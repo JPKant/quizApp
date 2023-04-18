@@ -1,0 +1,54 @@
+import '/flutter_flow/flutter_flow_theme.dart';
+import '/flutter_flow/flutter_flow_util.dart';
+import 'package:cloud_firestore/cloud_firestore.dart';
+import 'package:flutter/material.dart';
+import 'package:google_fonts/google_fonts.dart';
+import 'package:provider/provider.dart';
+
+import 'question_card_model.dart';
+export 'question_card_model.dart';
+
+class QuestionCardWidget extends StatefulWidget {
+  const QuestionCardWidget({
+    Key? key,
+    int? answer,
+    this.quizRef,
+    this.questionRef,
+  })  : this.answer = answer ?? 0,
+        super(key: key);
+
+  final int answer;
+  final DocumentReference? quizRef;
+  final DocumentReference? questionRef;
+
+  @override
+  _QuestionCardWidgetState createState() => _QuestionCardWidgetState();
+}
+
+class _QuestionCardWidgetState extends State<QuestionCardWidget> {
+  late QuestionCardModel _model;
+
+  @override
+  void setState(VoidCallback callback) {
+    super.setState(callback);
+    _model.onUpdate();
+  }
+
+  @override
+  void initState() {
+    super.initState();
+    _model = createModel(context, () => QuestionCardModel());
+  }
+
+  @override
+  void dispose() {
+    _model.maybeDispose();
+
+    super.dispose();
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    return Container();
+  }
+}
