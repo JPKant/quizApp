@@ -1,0 +1,525 @@
+import '/auth/firebase_auth/auth_util.dart';
+import '/backend/backend.dart';
+import '/flutter_flow/flutter_flow_theme.dart';
+import '/flutter_flow/flutter_flow_util.dart';
+import '/flutter_flow/flutter_flow_widgets.dart';
+import '/pages/questions/question2/question2_widget.dart';
+import 'package:cloud_firestore/cloud_firestore.dart';
+import 'package:flutter/material.dart';
+import 'package:google_fonts/google_fonts.dart';
+import 'package:provider/provider.dart';
+
+import 'question1_model.dart';
+export 'question1_model.dart';
+
+class Question1Widget extends StatefulWidget {
+  const Question1Widget({
+    Key? key,
+    this.quizRef,
+    this.questionRef,
+    this.progressRef,
+  }) : super(key: key);
+
+  final DocumentReference? quizRef;
+  final DocumentReference? questionRef;
+  final DocumentReference? progressRef;
+
+  @override
+  _Question1WidgetState createState() => _Question1WidgetState();
+}
+
+class _Question1WidgetState extends State<Question1Widget> {
+  late Question1Model _model;
+
+  final scaffoldKey = GlobalKey<ScaffoldState>();
+  final _unfocusNode = FocusNode();
+
+  @override
+  void initState() {
+    super.initState();
+    _model = createModel(context, () => Question1Model());
+  }
+
+  @override
+  void dispose() {
+    _model.dispose();
+
+    _unfocusNode.dispose();
+    super.dispose();
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    return StreamBuilder<QuestionsRecord>(
+      stream: QuestionsRecord.getDocument(widget.questionRef!),
+      builder: (context, snapshot) {
+        // Customize what your widget looks like when it's loading.
+        if (!snapshot.hasData) {
+          return Center(
+            child: SizedBox(
+              width: 50,
+              height: 50,
+              child: CircularProgressIndicator(
+                color: FlutterFlowTheme.of(context).primary,
+              ),
+            ),
+          );
+        }
+        final question1QuestionsRecord = snapshot.data!;
+        return GestureDetector(
+          onTap: () => FocusScope.of(context).requestFocus(_unfocusNode),
+          child: Scaffold(
+            key: scaffoldKey,
+            backgroundColor: FlutterFlowTheme.of(context).primaryBackground,
+            appBar: AppBar(
+              backgroundColor: FlutterFlowTheme.of(context).primary,
+              automaticallyImplyLeading: false,
+              title: Text(
+                'Question 1',
+                style: FlutterFlowTheme.of(context).headlineMedium.override(
+                      fontFamily: 'Outfit',
+                      color: Colors.white,
+                      fontSize: 22,
+                    ),
+              ),
+              actions: [],
+              centerTitle: true,
+              elevation: 2,
+            ),
+            body: SafeArea(
+              child: StreamBuilder<QuizRecord>(
+                stream: QuizRecord.getDocument(widget.quizRef!),
+                builder: (context, snapshot) {
+                  // Customize what your widget looks like when it's loading.
+                  if (!snapshot.hasData) {
+                    return Center(
+                      child: SizedBox(
+                        width: 50,
+                        height: 50,
+                        child: CircularProgressIndicator(
+                          color: FlutterFlowTheme.of(context).primary,
+                        ),
+                      ),
+                    );
+                  }
+                  final columnQuizRecord = snapshot.data!;
+                  return SingleChildScrollView(
+                    primary: false,
+                    child: Column(
+                      mainAxisSize: MainAxisSize.max,
+                      mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                      crossAxisAlignment: CrossAxisAlignment.stretch,
+                      children: [
+                        Padding(
+                          padding:
+                              EdgeInsetsDirectional.fromSTEB(20, 20, 20, 0),
+                          child: Builder(
+                            builder: (context) {
+                              final questionLine = question1QuestionsRecord
+                                  .questionText!
+                                  .toList();
+                              return Column(
+                                mainAxisSize: MainAxisSize.max,
+                                children: List.generate(questionLine.length,
+                                    (questionLineIndex) {
+                                  final questionLineItem =
+                                      questionLine[questionLineIndex];
+                                  return Text(
+                                    questionLineItem,
+                                    style:
+                                        FlutterFlowTheme.of(context).bodyMedium,
+                                  );
+                                }),
+                              );
+                            },
+                          ),
+                        ),
+                        Padding(
+                          padding: EdgeInsetsDirectional.fromSTEB(20, 0, 20, 0),
+                          child: Builder(
+                            builder: (context) {
+                              final answerChoiceText = question1QuestionsRecord
+                                  .answerChoiceText!
+                                  .toList();
+                              return Column(
+                                mainAxisSize: MainAxisSize.max,
+                                children: List.generate(answerChoiceText.length,
+                                    (answerChoiceTextIndex) {
+                                  final answerChoiceTextItem =
+                                      answerChoiceText[answerChoiceTextIndex];
+                                  return Padding(
+                                    padding: EdgeInsetsDirectional.fromSTEB(
+                                        5, 5, 5, 5),
+                                    child: Text(
+                                      answerChoiceTextItem,
+                                      style: FlutterFlowTheme.of(context)
+                                          .bodyMedium,
+                                    ),
+                                  );
+                                }),
+                              );
+                            },
+                          ),
+                        ),
+                        Padding(
+                          padding:
+                              EdgeInsetsDirectional.fromSTEB(20, 10, 20, 10),
+                          child: FFButtonWidget(
+                            onPressed: () async {
+                              if (question1QuestionsRecord.correctAnswer ==
+                                  'A') {
+                                final progressUpdateData1 =
+                                    createProgressRecordData(
+                                  oneCorrect: true,
+                                );
+                                await widget.progressRef!
+                                    .update(progressUpdateData1);
+                                await Navigator.pushAndRemoveUntil(
+                                  context,
+                                  MaterialPageRoute(
+                                    builder: (context) => Question2Widget(
+                                      quizRef: widget.quizRef,
+                                      questionRef: columnQuizRecord.questionID!
+                                          .toList()[1],
+                                      progressRef: widget.progressRef,
+                                    ),
+                                  ),
+                                  (r) => false,
+                                );
+                              } else {
+                                final progressUpdateData2 =
+                                    createProgressRecordData(
+                                  oneCorrect: false,
+                                );
+                                await widget.progressRef!
+                                    .update(progressUpdateData2);
+                                await Navigator.pushAndRemoveUntil(
+                                  context,
+                                  MaterialPageRoute(
+                                    builder: (context) => Question2Widget(
+                                      quizRef: widget.quizRef,
+                                      questionRef: columnQuizRecord.questionID!
+                                          .toList()[1],
+                                      progressRef: widget.progressRef,
+                                    ),
+                                  ),
+                                  (r) => false,
+                                );
+                              }
+                            },
+                            text: '(A)',
+                            options: FFButtonOptions(
+                              width: 130,
+                              height: 40,
+                              padding:
+                                  EdgeInsetsDirectional.fromSTEB(0, 0, 0, 0),
+                              iconPadding:
+                                  EdgeInsetsDirectional.fromSTEB(0, 0, 0, 0),
+                              color: FlutterFlowTheme.of(context).primary,
+                              textStyle: FlutterFlowTheme.of(context)
+                                  .titleSmall
+                                  .override(
+                                    fontFamily: 'Outfit',
+                                    color: Colors.white,
+                                  ),
+                              elevation: 2,
+                              borderSide: BorderSide(
+                                color: Colors.transparent,
+                                width: 1,
+                              ),
+                              borderRadius: BorderRadius.circular(8),
+                            ),
+                          ),
+                        ),
+                        Padding(
+                          padding:
+                              EdgeInsetsDirectional.fromSTEB(20, 10, 20, 10),
+                          child: FFButtonWidget(
+                            onPressed: () async {
+                              if (question1QuestionsRecord.correctAnswer ==
+                                  'B') {
+                                final progressUpdateData1 =
+                                    createProgressRecordData(
+                                  oneCorrect: true,
+                                );
+                                await widget.progressRef!
+                                    .update(progressUpdateData1);
+                                await Navigator.pushAndRemoveUntil(
+                                  context,
+                                  MaterialPageRoute(
+                                    builder: (context) => Question2Widget(
+                                      quizRef: widget.quizRef,
+                                      questionRef: columnQuizRecord.questionID!
+                                          .toList()[1],
+                                      progressRef: widget.progressRef,
+                                    ),
+                                  ),
+                                  (r) => false,
+                                );
+                              } else {
+                                final progressUpdateData2 =
+                                    createProgressRecordData(
+                                  oneCorrect: false,
+                                );
+                                await widget.progressRef!
+                                    .update(progressUpdateData2);
+                                await Navigator.pushAndRemoveUntil(
+                                  context,
+                                  MaterialPageRoute(
+                                    builder: (context) => Question2Widget(
+                                      quizRef: widget.quizRef,
+                                      questionRef: columnQuizRecord.questionID!
+                                          .toList()[1],
+                                      progressRef: widget.progressRef,
+                                    ),
+                                  ),
+                                  (r) => false,
+                                );
+                              }
+                            },
+                            text: '(B)',
+                            options: FFButtonOptions(
+                              width: 130,
+                              height: 40,
+                              padding:
+                                  EdgeInsetsDirectional.fromSTEB(0, 0, 0, 0),
+                              iconPadding:
+                                  EdgeInsetsDirectional.fromSTEB(0, 0, 0, 0),
+                              color: FlutterFlowTheme.of(context).primary,
+                              textStyle: FlutterFlowTheme.of(context)
+                                  .titleSmall
+                                  .override(
+                                    fontFamily: 'Outfit',
+                                    color: Colors.white,
+                                  ),
+                              elevation: 2,
+                              borderSide: BorderSide(
+                                color: Colors.transparent,
+                                width: 1,
+                              ),
+                              borderRadius: BorderRadius.circular(8),
+                            ),
+                          ),
+                        ),
+                        Padding(
+                          padding:
+                              EdgeInsetsDirectional.fromSTEB(20, 10, 20, 10),
+                          child: FFButtonWidget(
+                            onPressed: () async {
+                              if (question1QuestionsRecord.correctAnswer ==
+                                  'C') {
+                                final progressUpdateData1 =
+                                    createProgressRecordData(
+                                  oneCorrect: true,
+                                );
+                                await widget.progressRef!
+                                    .update(progressUpdateData1);
+                                await Navigator.pushAndRemoveUntil(
+                                  context,
+                                  MaterialPageRoute(
+                                    builder: (context) => Question2Widget(
+                                      quizRef: widget.quizRef,
+                                      questionRef: columnQuizRecord.questionID!
+                                          .toList()[1],
+                                      progressRef: widget.progressRef,
+                                    ),
+                                  ),
+                                  (r) => false,
+                                );
+                              } else {
+                                final progressUpdateData2 =
+                                    createProgressRecordData(
+                                  oneCorrect: false,
+                                );
+                                await widget.progressRef!
+                                    .update(progressUpdateData2);
+                                await Navigator.pushAndRemoveUntil(
+                                  context,
+                                  MaterialPageRoute(
+                                    builder: (context) => Question2Widget(
+                                      quizRef: widget.quizRef,
+                                      questionRef: columnQuizRecord.questionID!
+                                          .toList()[1],
+                                      progressRef: widget.progressRef,
+                                    ),
+                                  ),
+                                  (r) => false,
+                                );
+                              }
+                            },
+                            text: '(C)',
+                            options: FFButtonOptions(
+                              width: 130,
+                              height: 40,
+                              padding:
+                                  EdgeInsetsDirectional.fromSTEB(0, 0, 0, 0),
+                              iconPadding:
+                                  EdgeInsetsDirectional.fromSTEB(0, 0, 0, 0),
+                              color: FlutterFlowTheme.of(context).primary,
+                              textStyle: FlutterFlowTheme.of(context)
+                                  .titleSmall
+                                  .override(
+                                    fontFamily: 'Outfit',
+                                    color: Colors.white,
+                                  ),
+                              elevation: 2,
+                              borderSide: BorderSide(
+                                color: Colors.transparent,
+                                width: 1,
+                              ),
+                              borderRadius: BorderRadius.circular(8),
+                            ),
+                          ),
+                        ),
+                        Padding(
+                          padding:
+                              EdgeInsetsDirectional.fromSTEB(20, 10, 20, 10),
+                          child: FFButtonWidget(
+                            onPressed: () async {
+                              if (question1QuestionsRecord.correctAnswer ==
+                                  'D') {
+                                final progressUpdateData1 =
+                                    createProgressRecordData(
+                                  oneCorrect: true,
+                                );
+                                await widget.progressRef!
+                                    .update(progressUpdateData1);
+                                await Navigator.pushAndRemoveUntil(
+                                  context,
+                                  MaterialPageRoute(
+                                    builder: (context) => Question2Widget(
+                                      quizRef: widget.quizRef,
+                                      questionRef: columnQuizRecord.questionID!
+                                          .toList()[1],
+                                      progressRef: widget.progressRef,
+                                    ),
+                                  ),
+                                  (r) => false,
+                                );
+                              } else {
+                                final progressUpdateData2 =
+                                    createProgressRecordData(
+                                  oneCorrect: false,
+                                );
+                                await widget.progressRef!
+                                    .update(progressUpdateData2);
+                                await Navigator.pushAndRemoveUntil(
+                                  context,
+                                  MaterialPageRoute(
+                                    builder: (context) => Question2Widget(
+                                      quizRef: widget.quizRef,
+                                      questionRef: columnQuizRecord.questionID!
+                                          .toList()[1],
+                                      progressRef: widget.progressRef,
+                                    ),
+                                  ),
+                                  (r) => false,
+                                );
+                              }
+                            },
+                            text: '(D)',
+                            options: FFButtonOptions(
+                              width: 130,
+                              height: 40,
+                              padding:
+                                  EdgeInsetsDirectional.fromSTEB(0, 0, 0, 0),
+                              iconPadding:
+                                  EdgeInsetsDirectional.fromSTEB(0, 0, 0, 0),
+                              color: FlutterFlowTheme.of(context).primary,
+                              textStyle: FlutterFlowTheme.of(context)
+                                  .titleSmall
+                                  .override(
+                                    fontFamily: 'Outfit',
+                                    color: Colors.white,
+                                  ),
+                              elevation: 2,
+                              borderSide: BorderSide(
+                                color: Colors.transparent,
+                                width: 1,
+                              ),
+                              borderRadius: BorderRadius.circular(8),
+                            ),
+                          ),
+                        ),
+                        Padding(
+                          padding:
+                              EdgeInsetsDirectional.fromSTEB(20, 10, 20, 10),
+                          child: FFButtonWidget(
+                            onPressed: () async {
+                              if (question1QuestionsRecord.correctAnswer ==
+                                  'E') {
+                                final progressUpdateData1 =
+                                    createProgressRecordData(
+                                  oneCorrect: true,
+                                );
+                                await widget.progressRef!
+                                    .update(progressUpdateData1);
+                                await Navigator.pushAndRemoveUntil(
+                                  context,
+                                  MaterialPageRoute(
+                                    builder: (context) => Question2Widget(
+                                      quizRef: widget.quizRef,
+                                      questionRef: columnQuizRecord.questionID!
+                                          .toList()[1],
+                                      progressRef: widget.progressRef,
+                                    ),
+                                  ),
+                                  (r) => false,
+                                );
+                              } else {
+                                final progressUpdateData2 =
+                                    createProgressRecordData(
+                                  oneCorrect: false,
+                                );
+                                await widget.progressRef!
+                                    .update(progressUpdateData2);
+                                await Navigator.pushAndRemoveUntil(
+                                  context,
+                                  MaterialPageRoute(
+                                    builder: (context) => Question2Widget(
+                                      quizRef: widget.quizRef,
+                                      questionRef: columnQuizRecord.questionID!
+                                          .toList()[1],
+                                      progressRef: widget.progressRef,
+                                    ),
+                                  ),
+                                  (r) => false,
+                                );
+                              }
+                            },
+                            text: '(E)',
+                            options: FFButtonOptions(
+                              width: 130,
+                              height: 40,
+                              padding:
+                                  EdgeInsetsDirectional.fromSTEB(0, 0, 0, 0),
+                              iconPadding:
+                                  EdgeInsetsDirectional.fromSTEB(0, 0, 0, 0),
+                              color: FlutterFlowTheme.of(context).primary,
+                              textStyle: FlutterFlowTheme.of(context)
+                                  .titleSmall
+                                  .override(
+                                    fontFamily: 'Outfit',
+                                    color: Colors.white,
+                                  ),
+                              elevation: 2,
+                              borderSide: BorderSide(
+                                color: Colors.transparent,
+                                width: 1,
+                              ),
+                              borderRadius: BorderRadius.circular(8),
+                            ),
+                          ),
+                        ),
+                      ],
+                    ),
+                  );
+                },
+              ),
+            ),
+          ),
+        );
+      },
+    );
+  }
+}
